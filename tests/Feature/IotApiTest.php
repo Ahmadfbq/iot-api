@@ -1,24 +1,26 @@
 <?php
 
 use App\Events\DeliveryUpdated;
-use App\Models\Home;
+use App\Models\Delivery;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
 
 it('returns a welcome message', function () {
-    $response = $this->get('/api/home');
+    $response = $this->get('/api/delivery');
 
     $response->assertStatus(200);
     $response->assertJson([
-        'message' => 'Welcome to the IoT API Home Endpoint',
+        'message' => 'Welcome to the IoT API Delivery Endpoint',
         'status' => 'success'
     ]);
 });
 
 it('receives info and stores it in the database', function () {
     Event::fake();
+    User::factory()->create();
 
     $payload = [
         'gate_status' => 'opened',
@@ -26,10 +28,10 @@ it('receives info and stores it in the database', function () {
         'pin' => '1234'
     ];
 
-    $response = $this->post('/api/home/info', $payload);
+    $response = $this->post('/api/delivery/info', $payload);
 
     $response->assertStatus(201);
-    $this->assertDatabaseHas('homes', $payload);
+    $this->assertDatabaseHas('deliveries', ['gate_status' => $payload['gate_status'], 'package_status' => $payload['package_status'], 'pin' => $payload['pin'], 'user_id' => 1]);
     Event::assertDispatched(DeliveryUpdated::class, function (DeliveryUpdated $event) use ($payload) {
         return $event->data['gate_status'] === $payload['gate_status']
             && $event->data['package_status'] === $payload['package_status']
@@ -44,14 +46,9 @@ it('displays info from the database', function () {
         'pin' => '1234'
     ];
 
-    $home = Home::query()->create($payload);
-    $response = $this->get("/api/home/info/{$home->id}");
+    $delivery = Delivery::query()->create($payload);
+    $response = $this->get("/api/delivery/info/{$delivery->id}");
 
     $response->assertStatus(200);
     $response->assertJson($payload);
 });
-
-// tests:
-// 1. test the home endpoint returns a welcome message
-// 2. test the receiveInfo endpoint receives the correct info and stores it in the database
-// 3. test the displayInfo endpoint returns the correct info from the database

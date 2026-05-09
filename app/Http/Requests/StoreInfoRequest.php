@@ -23,6 +23,7 @@ class StoreInfoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'delivery_name' => 'sometimes|string|max:255',
             'gate_status' => 'required|string|in:opened,closed',
             'package_status' => 'required|string|in:arrived,taken',
             'pin' => 'required|digits:4'

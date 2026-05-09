@@ -1,10 +1,12 @@
 <?php
 
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DeliveryController;
+use App\Models\User;
 
-Route::prefix("home")->group(function () {
-    Route::get('/', [HomeController::class, 'index']); // web
-    Route::post('/info', [HomeController::class, 'receiveInfo']); // from the esp32 device
-    Route::get('/info', [HomeController::class, 'listInfo']); // web
-    Route::get('/info/{id}', [HomeController::class,'displayInfo']); // web
+Route::prefix("delivery")->group(function () {
+    Route::get('/user/{id}', fn($id) => User::find($id)); // web
+    Route::get('/', [DeliveryController::class, 'index']); // web
+    Route::post('/info', [DeliveryController::class, 'receiveInfo']); // from the esp32 device
+    Route::get('/info', [DeliveryController::class, 'listInfo']); // web
+    Route::get('/info/{id}', [DeliveryController::class,'displayInfo']); // web
 });

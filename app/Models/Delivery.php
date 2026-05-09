@@ -3,18 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Home extends Model
+class Delivery extends Model
 {
     protected $guarded = ['id'];
 
     protected $fillable = [
+        'user_id',
+        'delivery_name',
         'gate_status',
         'package_status',
         'pin',
     ];
 
-    // I might not need to cast this
     protected function casts(): array
     {
         return [
@@ -24,5 +26,10 @@ class Home extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

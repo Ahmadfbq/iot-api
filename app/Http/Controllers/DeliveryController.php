@@ -4,48 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Events\DeliveryUpdated;
 use App\Http\Requests\StoreInfoRequest;
-use App\Models\Home;
+use App\Models\Delivery;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
-class HomeController extends Controller
+class DeliveryController extends Controller
 {
     public function index(): JsonResponse
     {
         return response()->json([
-            'message' => 'Welcome to the IoT API Home Endpoint',
+            'message' => 'Welcome to the IoT API Delivery Endpoint',
             'status' => 'success'
         ]);
     }
 
-    public function receiveInfo(StoreInfoRequest $request): Home
+    public function receiveInfo(StoreInfoRequest $request): Delivery
     {
         // Handle the incoming info from the ESP32 device
         $info = $request->validated();
         $payload = [
+            'user_id' => User::first()->id,
+            'delivery_name' => $info['delivery_name'] ?? 'Default Delivery Name',
             'gate_status' => $info['gate_status'],
             'package_status' => $info['package_status'],
             'pin' => $info['pin']
         ];
 
-        $home = Home::query()->create($payload);
+        $delivery = Delivery::query()->create($payload);
 
-        event(new DeliveryUpdated($home->toArray()));
+        event(new DeliveryUpdated($delivery->toArray()));
 
-        return $home;
+        return $delivery;
     }
     
     public function listInfo(): JsonResponse
     {
-        $all = Home::query()
+        $all = Delivery::query()
             ->orderByDesc('id')
-            ->get();
+            ->paginate(5);
 
         return response()->json($all);
     }
 
-    public function displayInfo(int $id): Home
+    public function displayInfo(int $id): Delivery
     {
-        $info = Home::query()->findOrFail($id);
+        $info = Delivery::query()->findOrFail($id);
         return $info;
     }
 }
