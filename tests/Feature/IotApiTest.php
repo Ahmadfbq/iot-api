@@ -39,6 +39,26 @@ it('receives info and stores it in the database', function () {
     });
 });
 
+it('receives info without requiring an existing user', function () {
+    Event::fake();
+
+    $payload = [
+        'gate_status' => 'opened',
+        'package_status' => 'taken',
+        'pin' => '1234'
+    ];
+
+    $response = $this->post('/api/delivery/info', $payload);
+
+    $response->assertStatus(201);
+    $this->assertDatabaseHas('deliveries', [
+        'gate_status' => $payload['gate_status'],
+        'package_status' => $payload['package_status'],
+        'pin' => $payload['pin'],
+        'user_id' => null,
+    ]);
+});
+
 it('displays info from the database', function () {
     $payload = [
         'gate_status' => 'opened',

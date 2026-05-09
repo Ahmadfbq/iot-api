@@ -23,7 +23,7 @@ class DeliveryController extends Controller
         // Handle the incoming info from the ESP32 device
         $info = $request->validated();
         $payload = [
-            'user_id' => User::first()->id,
+            'user_id' => User::query()->value('id'),
             'delivery_name' => $info['delivery_name'] ?? 'Default Delivery Name',
             'gate_status' => $info['gate_status'],
             'package_status' => $info['package_status'],
