@@ -1,7 +1,9 @@
 <?php
 
+use App\Events\DeliveryUpdated;
 use App\Models\Home;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
 
@@ -16,6 +18,8 @@ it('returns a welcome message', function () {
 });
 
 it('receives info and stores it in the database', function () {
+    Event::fake();
+
     $payload = [
         'gate_status' => 'opened',
         'package_status' => 'taken',
@@ -26,6 +30,11 @@ it('receives info and stores it in the database', function () {
 
     $response->assertStatus(201);
     $this->assertDatabaseHas('homes', $payload);
+    Event::assertDispatched(DeliveryUpdated::class, function (DeliveryUpdated $event) use ($payload) {
+        return $event->data['gate_status'] === $payload['gate_status']
+            && $event->data['package_status'] === $payload['package_status']
+            && $event->data['pin'] === $payload['pin'];
+    });
 });
 
 it('displays info from the database', function () {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DeliveryUpdated;
 use App\Http\Requests\StoreInfoRequest;
 use App\Models\Home;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +26,21 @@ class HomeController extends Controller
             'package_status' => $info['package_status'],
             'pin' => $info['pin']
         ];
-        return Home::query()->create($payload);
+
+        $home = Home::query()->create($payload);
+
+        event(new DeliveryUpdated($home->toArray()));
+
+        return $home;
+    }
+    
+    public function listInfo(): JsonResponse
+    {
+        $all = Home::query()
+            ->orderByDesc('id')
+            ->get();
+
+        return response()->json($all);
     }
 
     public function displayInfo(int $id): Home
