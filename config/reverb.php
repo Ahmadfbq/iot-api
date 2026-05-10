@@ -82,7 +82,11 @@ return [
                     'scheme' => env('REVERB_SCHEME', 'https'),
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
-                'allowed_origins' => ['https://iot-web-vert.vercel.app'],
+                'allowed_origins' => [
+                    'https://iot-web-vert.vercel.app',
+                    'http://localhost:5173',
+                    'http://localhost:3000',
+                ],
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
                 'activity_timeout' => env('REVERB_APP_ACTIVITY_TIMEOUT', 30),
                 'max_connections' => env('REVERB_APP_MAX_CONNECTIONS'),
