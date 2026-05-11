@@ -1,58 +1,76 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# IoT Delivery API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel-based API for tracking delivery events from an IoT device, with realtime updates for connected clients. The backend receives status changes from an ESP32 device, stores each delivery record, and broadcasts updates so dashboards or web clients can react immediately.
 
-## About Laravel
+## What it does
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Accepts delivery updates from a device through a simple JSON API.
+- Stores delivery records with gate status, package status, and PIN data.
+- Broadcasts `DeliveryUpdated` events over Laravel Reverb for realtime clients.
+- Exposes read endpoints for web views or integrations that need delivery history.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## API Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+All routes live under the `/api` prefix.
 
-## Learning Laravel
+- `GET /api/delivery` returns a small service status response.
+- `POST /api/delivery/info` receives delivery data from the ESP32 device.
+- `GET /api/delivery/info` returns paginated delivery records.
+- `GET /api/delivery/info/{id}` returns a single delivery record.
+- `GET /api/delivery/user/{id}` looks up a user by ID.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Broadcast listeners can subscribe to:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- `delivery.info`
+- `delivery.info.{id}`
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Data Flow
 
-## Agentic Development
+1. The ESP32 posts delivery status data to `POST /api/delivery/info`.
+2. The API validates and stores the payload in the `deliveries` table.
+3. A `DeliveryUpdated` event is broadcast immediately.
+4. Realtime clients listening on the channel receive the updated delivery payload.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Setup
+
+1. Install dependencies:
+
+	```bash
+	composer install
+	npm install
+	```
+
+2. Copy the environment file and generate an app key:
+
+	```bash
+	cp .env.example .env
+	php artisan key:generate
+	```
+
+3. Run migrations:
+
+	```bash
+	php artisan migrate
+	```
+
+4. Start the app and Vite in separate terminals, or use the built-in dev script:
+
+	```bash
+	composer run dev
+	```
+
+## Environment
+
+Make sure your `.env` file includes the usual database settings plus the Reverb variables used by `resources/js/echo.js`.
+
+## Testing
+
+Run the test suite with:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan test
 ```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the MIT license.

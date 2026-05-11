@@ -30,8 +30,8 @@ class DeliveryUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('home.info'), // broadcast to all clients subscribed to home.info
-            new Channel("home.info.{$this->data['id']}"),
+            new Channel('delivery.info'), // broadcast to all clients subscribed to delivery.info
+            new Channel("delivery.info.{$this->data['id']}"),
         ];
     }
 
