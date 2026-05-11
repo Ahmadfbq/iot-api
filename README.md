@@ -71,6 +71,9 @@ Run the test suite with:
 php artisan test
 ```
 
+## Deployment
+The app is deployed on Laravel Cloud on this link: https://iot-api-main-6oj5o8.laravel.cloud
+
 ## License
 
 This project is open-sourced software licensed under the MIT license.
